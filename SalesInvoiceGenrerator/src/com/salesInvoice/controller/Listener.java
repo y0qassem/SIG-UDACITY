@@ -14,6 +14,7 @@ import com.salesInvoice.view.InvoiceLineDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,8 +50,8 @@ public class Listener implements ActionListener {
                 
                 break;
 
-        case"saveFile":
-           
+        case"Save File":
+          saveFiles();
             break;
         case"Create New Invoice":
             createNewInvoice();
@@ -185,8 +186,7 @@ public class Listener implements ActionListener {
         }
     }
 
-    private void saveFiles() {
-    }
+   
 
     private void newInvoiceDialogCancel() {
         headerDialog.setVisible(false);
@@ -257,5 +257,38 @@ public class Listener implements ActionListener {
         frame.getInvoiceHeaderTbl().setRowSelectionInterval(selectedInvHeader, selectedInvHeader);
         lineDialog.dispose();
         lineDialog = null;
+    }
+    private void saveFiles() {
+        ArrayList<Header> invoicesArray = frame.getInvoicesArray();
+        JFileChooser fc = new JFileChooser();
+        try {
+            int result = fc.showSaveDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File headerFile = fc.getSelectedFile();
+                FileWriter hfw = new FileWriter(headerFile);
+                String headers = "";
+                String lines = "";
+                for (Header invoice : invoicesArray) {
+                    headers += invoice.toString();
+                    headers += "\n";
+                    for (InvoiceItem line : invoice.getItems()) {
+                        lines += line.toString();
+                        lines += "\n";
+                    }
+                }
+              
+                headers = headers.substring(0, headers.length()-1);
+                lines = lines.substring(0, lines.length()-1);
+                result = fc.showSaveDialog(frame);
+                File lineFile = fc.getSelectedFile();
+                FileWriter lfw = new FileWriter(lineFile);
+                hfw.write(headers);
+                lfw.write(lines);
+                hfw.close();
+                lfw.close();
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
